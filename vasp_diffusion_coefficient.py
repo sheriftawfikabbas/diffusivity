@@ -17,7 +17,7 @@ from pymatgen.io.vasp import Poscar
 plt.rcParams.update({'font.size': 30})
 
 do_bonding = False
-do_rdf = True
+do_rdf = False
 calculation_type = 'tracer'
 
 num_images = 50000
