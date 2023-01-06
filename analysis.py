@@ -1,6 +1,7 @@
 import numpy as np
-
-
+from ase import Atom, Atoms
+from ase.cell import Cell
+from ase.io import read,write
 class DiffusionCoefficient:
 
     def __init__(self, traj, timestep, atom_indices=None, molecule=False, calculation_type="tracer", axis='all'):
@@ -172,23 +173,14 @@ class DiffusionCoefficient:
                 # Calculating for each atom individually, grouping by species type (e.g. solid state)
                 if self.calculation_type == 'tracer':
                     # For each atom, work out displacement from start coordinate and collect information with like atoms
-                    tracer_diffs_atoms = []
                     for atom_no in self.atom_indices:
                         sym_index = self.types_of_atoms.index(
                             seg[image_no].symbols[atom_no])
-
-                        diff = seg[image_no].positions[atom_no] - \
-                            seg[0].positions[atom_no]
-                        '''
-                        for xi in range(len(diff)):
-                            if abs(diff[xi]) - abs(tracer_diffs[image_no - 1][atom_no][xi]) > (0.5*self.cell.cellpar()[xi]):
-                                print(image_no,'OUCH',diff[xi],tracer_diffs[image_no - 1][atom_no][xi],atom_no,xi)
-                                diff[xi] = diff[xi] % self.cell.cellpar()[xi]
-                                print('Correction',diff[xi])   
-                        tracer_diffs_atoms += [diff]
-                        '''
+                        #Distance between consecutive positions must use the get_distance() function to avoid spurious addition of lattice constants
+                        a = Atoms(positions=[seg[image_no].positions[atom_no],seg[0].positions[atom_no]], numbers=[1,1], pbc=True, cell=self.cell)
+                        diff = a.get_distance(0,1, mic=True)
+                        
                         xyz_disp[sym_index] += np.square(diff)
-                    #tracer_diffs += [tracer_diffs_atoms]
                 elif self.calculation_type == 'com':
                     # For each atom, work out displacement from start coordinate and collect information with like atoms
                     for atom_no in self.atom_indices:

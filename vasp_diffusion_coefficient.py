@@ -130,23 +130,12 @@ for i_trajectory_file in range(len(trajectory_files)):
     list_of_added = []
     atomic_numbers = np.unique(initial.get_atomic_numbers())
 
-    # get last poscar of previous XDATCAR
-    om = np.zeros(initial.positions.shape)
-    if i_trajectory_file > 0:
-        # for j in range(0,i_trajectory_file):
-        prev_num_steps = len(trajectories_combined[i_trajectory_file-1])-1
-
-        ref_poscar = lattice_str+''.join(trajectories_lines_combined[i_trajectory_file-1][7+prev_num_steps*(
-            num_atoms+1):7+(prev_num_steps+1)*(num_atoms+1)])
-
-        om = get_operation_matrix(ref_poscar)
-
     for i in range(0, num_steps):
         positions_str = ''.join(
             temp_trajectory_list[7+i*(num_atoms+1):7+(i+1)*(num_atoms+1)])
-        a = string_to_ase_with_operation(
-            lattice_str+positions_str, om, 1e-8)
-        a_ang = string_to_ase_with_operation(lattice_str+positions_str, om)
+        a = string_to_ase(
+            lattice_str+positions_str, 1e-8)
+        a_ang = string_to_ase(lattice_str+positions_str)
         trajectory_list += [a]
         trajectory_list_ang += [a_ang]
 
@@ -221,20 +210,20 @@ if do_rdf:
 
 # Diffusion calculation
 
+cell = initial.cell
+atomic_numbers = initial.numbers
+
 diffusion_coefficient = DiffusionCoefficient(
     trajectory_list, dt*1e-15, calculation_type=calculation_type, axis=axes)
 diffusion_coefficient.calculate()
-# diffusion_coefficient.calculate()
 
 diff_coeff = diffusion_coefficient.get_diffusion_coefficients()
-print(trajectory_file, diff_coeff)
+print(diff_coeff)
 
 diff_coeff_file.write(str(diff_coeff)+'\n')
 diff_coeff_file.flush()
 
 DiffusionCoeff[trajectory_file] = diffusion_coefficient.get_diffusion_coefficients()
-
-# diffusion_coefficient.plot(save_fig=True,fig_name=system_label+'_'+trajectory_file.split('.')[0])
 
 plt.figure(figsize=(15, 10))
 MSDs = []
