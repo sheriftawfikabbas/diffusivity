@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 from ase.units import Bohr, Rydberg, kJ, kB, fs, Hartree, mol, kcal
 from ase.geometry.analysis import Analysis
 from pymatgen.io.vasp import Poscar
+import argparse
 
 plt.rcParams.update({'font.size': 30})
 
@@ -20,7 +21,8 @@ do_bonding = False
 do_rdf = False
 calculation_type = 'tracer'
 
-num_images = 50000
+ignore_n_images = 0
+
 dt = 1
 axes = ['all', 'x', 'y', 'z', 'xy']
 axes = axes[0]
@@ -114,7 +116,7 @@ for i_trajectory_file in range(len(trajectory_files)):
     print('file: ', trajectory_file,
           'total number of images:', str(tot_num_images))
 
-    trajectory_partial = trajectory  # [0:num_images*number_of_lines]
+    trajectory_partial = trajectory
 
     trajectory_list = []
     trajectory_list_ang = []
@@ -215,20 +217,19 @@ atomic_numbers = initial.numbers
 
 diffusion_coefficient = DiffusionCoefficient(
     trajectory_list, dt*1e-15, calculation_type=calculation_type, axis=axes)
-diffusion_coefficient.calculate()
+diffusion_coefficient.calculate(ignore_n_images=ignore_n_images)
 
 diff_coeff = diffusion_coefficient.get_diffusion_coefficients()
-print(diff_coeff)
+print('Diffusion coefficients:', diff_coeff)
 
 diff_coeff_file.write(str(diff_coeff)+'\n')
 diff_coeff_file.flush()
 
-DiffusionCoeff[trajectory_file] = diffusion_coefficient.get_diffusion_coefficients()
-
 plt.figure(figsize=(15, 10))
 MSDs = []
-
 plots = []
+n = len(diffusion_coefficient.timesteps)
+print('Plotting MSD using', n, 'images')
 
 for sym_index in range(diffusion_coefficient.no_of_types_of_atoms):
     MSD = np.zeros(len(diffusion_coefficient.timesteps[1:]))
