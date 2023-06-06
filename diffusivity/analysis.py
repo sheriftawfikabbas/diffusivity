@@ -1,7 +1,7 @@
 import numpy as np
-from ase import Atom, Atoms
-from ase.cell import Cell
-from ase.io import read,write
+from ase import Atoms
+
+
 class DiffusionCoefficient:
 
     def __init__(self, traj, timestep, atom_indices=None, molecule=False, calculation_type="tracer", axis='all'):

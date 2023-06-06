@@ -1,19 +1,13 @@
 import glob
-from pymatgen.core import Structure
-from numpy.lib.function_base import _calculate_shapes
-from sklearn.metrics import r2_score
 from analysis import DiffusionCoefficient
-from ase import Atom, Atoms
-from ase.cell import Cell
 from ase.io.trajectory import Trajectory, TrajectoryReader
 from ase.io import read
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from ase.units import Bohr, Rydberg, kJ, kB, fs, Hartree, mol, kcal
 from ase.geometry.analysis import Analysis
-from pymatgen.io.vasp import Poscar
 import argparse
+from utilities import *
 
 plt.rcParams.update({'font.size': 30})
 
@@ -26,63 +20,6 @@ ignore_n_images = 0
 dt = 1
 axes = ['all', 'x', 'y', 'z', 'xy']
 axes = axes[0]
-
-# Operations to perform on subsequent POSCARs to
-# conform to previous POSCARs.
-
-
-def get_operation_matrix(ref_poscar_str):
-    poscar = Poscar.from_string(ref_poscar_str)
-    structure = poscar.structure
-    fc = structure.frac_coords
-    om = np.ndarray(fc.shape)
-
-    for i in range(fc.shape[0]):
-        for j in range(fc.shape[1]):
-            if fc[i][j] < 0:
-                om[i][j] = -(int(fc[i][j]) + 1)
-            elif fc[i][j] > 1:
-                om[i][j] = int(fc[i][j])
-            else:
-                om[i][j] = 0
-    return om
-
-
-def string_to_ase(poscar_str, convert=1):
-    poscar = Poscar.from_string(poscar_str)
-    structure = poscar.structure
-    fc = structure.frac_coords
-    lattice = structure.lattice
-    cc = structure.cart_coords
-
-    a = Atoms(scaled_positions=fc, numbers=structure.atomic_numbers, pbc=True, cell=Cell.fromcellpar(
-        [lattice.a*convert,
-         lattice.b*convert,
-         lattice.c*convert,
-         lattice.alpha,
-         lattice.beta,
-         lattice.gamma]))
-
-    return a
-
-
-def string_to_ase_with_operation(poscar_str, om, convert=1):
-    poscar = Poscar.from_string(poscar_str)
-    structure = poscar.structure
-    fc = structure.frac_coords
-    fc += om
-    lattice = structure.lattice
-    cc = structure.cart_coords
-
-    a = Atoms(scaled_positions=fc, numbers=structure.atomic_numbers, pbc=True, cell=Cell.fromcellpar(
-        [lattice.a*convert,
-         lattice.b*convert,
-         lattice.c*convert,
-         lattice.alpha,
-         lattice.beta,
-         lattice.gamma]))
-
-    return a
 
 
 print('Calculations for', calculation_type)
