@@ -29,12 +29,11 @@ class DiffusionCoefficient:
                 Indicate if we are studying a molecule instead of atoms, therefore use centre of mass in calculations
 
         """
-        # SHERIF
         self.axis = axis
 
         self.traj = traj
         self.timestep = timestep
-        self.cell = traj[0].cell
+        self.cell = traj[0].cell * 1e-8
 
         # Condition used if user wants to calculate diffusion coefficients for specific atoms or all atoms
         self.atom_indices = atom_indices
@@ -231,7 +230,6 @@ class DiffusionCoefficient:
         # slope, intercept, r_value, p_value, std_err = linregress(x,y)
 
         # Initialise objects
-        # SHERIF
         if self.axis == 'all':
             slopes = np.zeros(3)
             intercepts = np.zeros(3)

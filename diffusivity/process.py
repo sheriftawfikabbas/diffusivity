@@ -1,5 +1,5 @@
 import glob
-from analysis import DiffusionCoefficient
+from diffusion_coefficients import DiffusionCoefficient
 from ase.io.trajectory import Trajectory, TrajectoryReader
 from ase.io import read
 import numpy as np
@@ -73,7 +73,7 @@ for i_trajectory_file in range(len(trajectory_files)):
         positions_str = ''.join(
             temp_trajectory_list[7+i*(num_atoms+1):7+(i+1)*(num_atoms+1)])
         a = string_to_ase(
-            lattice_str+positions_str, 1e-8)
+            lattice_str+positions_str)
         a_ang = string_to_ase(lattice_str+positions_str)
         trajectory_list += [a]
         trajectory_list_ang += [a_ang]
