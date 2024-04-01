@@ -33,7 +33,7 @@ class DiffusionCoefficient:
 
         self.traj = traj
         self.timestep = timestep
-        self.cell = traj[0].cell * 1e-8
+        self.cell = traj[0].cell# * 1e-8
 
         # Condition used if user wants to calculate diffusion coefficients for specific atoms or all atoms
         self.atom_indices = atom_indices
@@ -179,7 +179,7 @@ class DiffusionCoefficient:
                         a = Atoms(positions=[seg[image_no].positions[atom_no],seg[0].positions[atom_no]], numbers=[1,1], pbc=True, cell=self.cell)
                         diff = a.get_distance(0,1, mic=True)
                         
-                        xyz_disp[sym_index] += np.square(diff)
+                        xyz_disp[sym_index] += np.square(diff)*1e-16
                 elif self.calculation_type == 'com':
                     # For each atom, work out displacement from start coordinate and collect information with like atoms
                     for atom_no in self.atom_indices:
@@ -187,7 +187,7 @@ class DiffusionCoefficient:
                             seg[image_no].symbols[atom_no])
                         xyz_disp[sym_index] += (seg[image_no].positions[atom_no] -
                                                 seg[0].positions[atom_no]) / self.no_of_atoms[sym_index]
-                    xyz_disp[sym_index] += np.square(xyz_disp[sym_index])
+                    xyz_disp[sym_index] += np.square(xyz_disp[sym_index])*1e-16
 
                 # Calculating for group of atoms (molecule) and work out squared displacement
                 else:
@@ -195,7 +195,7 @@ class DiffusionCoefficient:
                     for atom_no in self.atom_indices:
                         com_disp += seg[image_no].positions[atom_no] / \
                             len(self.atom_indices)
-                    xyz_disp[0] += np.square(com_disp - com_orig)
+                    xyz_disp[0] += np.square(com_disp - com_orig)*1e-16
 
                 # For each atom species or molecule, use xyz_disp to calculate the average data
                 for sym_index in range(self.no_of_types_of_atoms):
